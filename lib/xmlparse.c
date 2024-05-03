@@ -6416,3 +6416,23 @@ getElementType(XML_Parser parser,
   }
   return ret;
 }
+
+#ifdef XML_DTD
+
+static float
+accountingGetCurrentAmplification(XML_Parser rootParser) {
+  //                                          1.........1.........12 => 22
+  const size_t lenOfShortestInclude = sizeof("<!ENTITY a SYSTEM 'b'>") - 1;
+  const XmlBigCount countBytesOutput
+      = rootParser->m_accounting.countBytesDirect
+        + rootParser->m_accounting.countBytesIndirect;
+  const float amplificationFactor
+      = rootParser->m_accounting.countBytesDirect
+            ? (countBytesOutput
+               / (float)(rootParser->m_accounting.countBytesDirect))
+            : ((lenOfShortestInclude
+                + rootParser->m_accounting.countBytesIndirect)
+               / (float)lenOfShortestInclude);
+  assert(! rootParser->m_parentParser);
+  return amplificationFactor;
+}
